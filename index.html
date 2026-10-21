@@ -239,8 +239,9 @@
         const SHEET_ID = '19W33pFurvp8OHdVYSzcBsH2xjML6p5PStGCZeUblIsM';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
-        // Check URL for a direct product link
-        const urlParams = new URLSearchParams(window.location.search);
+        // Check URL for a direct product link using Hash (#) instead of Query (?)
+        const hash = window.location.hash.substring(1); 
+        const urlParams = new URLSearchParams(hash);
         const productLinkId = urlParams.get('product');
 
         async function loadProducts() {
@@ -263,13 +264,11 @@
                         // If a direct link was used, filter to just that product
                         if (productLinkId) {
                             const filtered = allProducts.filter(p => {
-                                // Create a URL-friendly string from the name
                                 const cleanName = (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
                                 return cleanName === productLinkId;
                             });
                             
                             if (filtered.length > 0) {
-                                // Update search bar to show what's filtered
                                 document.getElementById('searchInput').value = filtered[0].name;
                                 renderProducts(filtered);
                                 return;
@@ -300,11 +299,11 @@
             }
 
             products.forEach((product, index) => {
-                // Generate the Selar Checkout Link
+                // Use exact Selar link from the sheet
                 let selarLink = product['selar link'] ? product['selar link'].trim() : '#';
-                const checkoutLink = selarLink.includes('?') 
-                    ? selarLink + '&add_to_cart=1' 
-                    : selarLink + '?add_to_cart=1';
+                
+                // If you STILL get a 404 on Selar, it means the link in your Google sheet is wrong. 
+                // Ensure it starts with https://selar.co/...
 
                 const rawPrice = product['price usd'];
                 const formattedPrice = rawPrice && rawPrice.trim() !== '' ? `$${rawPrice}` : 'Free';
@@ -319,9 +318,9 @@
                 const fallbackImage = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop';
                 if (!imgUrl) imgUrl = fallbackImage;
 
-                // Generate the Shareable Store Link for this specific product
+                // Generate Hash-based Shareable Link
                 const cleanName = (product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                const storeLink = `${window.location.origin}${window.location.pathname}?product=${cleanName}`;
+                const storeLink = `${window.location.origin}${window.location.pathname}#product=${cleanName}`;
 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -340,7 +339,7 @@
                         <div class="price-row">
                             <div class="price">${formattedPrice}</div>
                         </div>
-                        <a href="${checkoutLink}" target="_blank" class="buy-btn">
+                        <a href="${selarLink}" target="_blank" class="buy-btn">
                             Buy Now
                         </a>
                     </div>
@@ -351,12 +350,11 @@
 
         // Function to copy the generated link to clipboard
         function shareProduct(link, event) {
-            event.stopPropagation(); // Prevents clicking the card behind it
+            event.stopPropagation();
             navigator.clipboard.writeText(link).then(() => {
                 const btn = event.currentTarget;
                 const originalHTML = btn.innerHTML;
                 
-                // Change icon to a checkmark temporarily
                 btn.innerHTML = '<i class="fa-solid fa-check" style="color: #4ade80;"></i>';
                 
                 setTimeout(() => {
