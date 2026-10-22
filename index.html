@@ -2,322 +2,555 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Happy Birthday, Sir Jacob</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Happy Birthday, Sir Jacob Emmanuel</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{height:100%;overflow:hidden;background:#05060f;color:#fff;font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  /* =========================================
+     RESET & VARIABLES
+     ========================================= */
+  :root {
+    --bg: #05050A;
+    --text: #FFFFFF;
+    --muted: #A0A5C0;
+    --pink: #FF5C9D;
+    --violet: #8B5CF6;
+    --cyan: #38E8FF;
+    --gold: #FFD166;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   
-  /* Progress Bar */
-  #prog{position:fixed;top:0;left:0;height:3px;width:0;background:#f5c542;z-index:200;opacity:0;transition:opacity .4s;box-shadow:0 0 12px #f5c542}
-  body.started #prog{opacity:1}
+  html, body {
+    height: 100%; height: 100dvh; overflow: hidden;
+    background-color: var(--bg); color: var(--text);
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+    touch-action: pan-y; user-select: none;
+  }
 
-  /* Lock Screen */
-  #lock{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#1b1f4b,#05060f 65%);transition:opacity .5s;padding:1rem}
-  #lock.out{opacity:0;pointer-events:none}
-  .lc{width:min(92vw,380px);padding:2.5rem 1.5rem;border-radius:24px;text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.6);animation:in .8s ease both}
-  @keyframes in{from{opacity:0;transform:translateY(30px) scale(.95)}}
-  .lc h1{font-size:1.4rem;margin-bottom:.4rem;font-weight:800}
-  .lc p{font-size:.85rem;color:#b9c2e0;margin-bottom:1.5rem}
+  /* =========================================
+     AURORA BACKGROUND
+     ========================================= */
+  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #05050A; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.6; animation: float 20s infinite alternate ease-in-out; }
+  .orb-1 { width: 60vw; height: 60vw; background: var(--violet); top: -10%; left: -10%; }
+  .orb-2 { width: 50vw; height: 50vw; background: var(--pink); bottom: -10%; right: -10%; animation-delay: -5s; }
+  .orb-3 { width: 40vw; height: 40vw; background: var(--cyan); top: 40%; left: 40%; animation-delay: -10s; opacity: 0.3; }
+  @keyframes float { 
+    0% { transform: translate(0, 0) scale(1); } 
+    100% { transform: translate(10vw, 10vh) scale(1.2); } 
+  }
+
+  /* =========================================
+     PROGRESS BAR & CANVAS
+     ========================================= */
+  #prog { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--gold); z-index: 200; opacity: 0; transition: opacity 0.4s; box-shadow: 0 0 15px var(--gold); }
+  body.started #prog { opacity: 1; }
   
-  .pin{display:flex;gap:.6rem;justify-content:center;margin-bottom:.5rem}
-  .pin.shake{animation:shk .4s}
-  @keyframes shk{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-8px)}}
-  .pin input{width:3.2rem;height:3.8rem;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font:700 1.5rem/1 inherit;text-align:center;outline:none;caret-color:#f5c542;transition:.2s}
-  .pin input:focus{border-color:#f5c542;background:rgba(245,197,66,.1);transform:translateY(-3px)}
-  .pin input.f{border-color:rgba(255,255,255,.4)}
-  .pin input.w{border-color:#ff4d6d;background:rgba(255,77,109,.1)}
-  #err{font-size:.8rem;color:#ff8fa3;height:1.2rem;opacity:0;transition:.2s}
-  #err.show{opacity:1}
+  #confetti-canvas { position: fixed; inset: 0; z-index: 90; pointer-events: none; }
 
-  /* Deck */
-  #deck{position:fixed;inset:0;opacity:0;transition:opacity .6s}
-  body.started #deck{opacity:1}
+  /* =========================================
+     LOCK SCREEN
+     ========================================= */
+  #lock { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1rem; transition: opacity 0.8s, transform 0.8s; background: rgba(5, 5, 10, 0.5); backdrop-filter: blur(10px); }
+  #lock.out { opacity: 0; transform: scale(1.1); pointer-events: none; }
   
-  .slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem 1.5rem 6rem;opacity:0;visibility:hidden;transform:scale(1.02);transition:opacity .6s,transform .8s,visibility .6s;overflow-y:auto;overflow-x:hidden}
-  .slide.active{opacity:1;visibility:visible;transform:scale(1);z-index:2}
-  .slide.exit{opacity:0;transform:scale(.98)}
-
-  .b1{background:linear-gradient(135deg,#0b102a,#1b1f4b)}
-  .b2{background:linear-gradient(120deg,#1b1f4b,#4a28a8)}
-  .b3{background:#f3f6ff;color:#0b102a}
-  .b4{background:linear-gradient(135deg,#0b102a,#1b1f4b)}
-  .b5{background:linear-gradient(135deg,#1b1f4b,#05060f)}
-  .b6{background:linear-gradient(135deg,#4a28a8,#0b102a)}
-
-  .eyebrow{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;font-weight:700;color:#f5c542;margin-bottom:1rem}
-  .b3 .eyebrow{color:#8a6d0a}
+  .lock-card { 
+    width: min(92vw, 400px); padding: 3rem 2rem; border-radius: 30px; text-align: center;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+    animation: popIn 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  }
+  @keyframes popIn { from { opacity: 0; transform: translateY(40px) scale(0.9); } }
   
-  .ttl{font-size:clamp(2.2rem,8vw,5rem);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:.2rem}
-  .name{font-size:clamp(1.5rem,5vw,3rem);font-weight:700;color:#f5c542;margin-bottom:1.5rem}
-  .msg{max-width:800px;font-size:clamp(.95rem,2vw,1.2rem);line-height:1.7;color:#b9c2e0;margin-top:1.5rem}
-  .sign{color:#f5c542;font-style:italic;margin-top:1.5rem;font-size:.9rem}
-  .rule{width:60px;height:3px;background:#f5c542;border-radius:2px;margin:0 auto 1.5rem}
+  .lock-card h1 { font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.02em; }
+  .lock-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 2rem; }
+  
+  .pin-box { display: flex; gap: 0.8rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pin-box.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+  
+  .pin-box input {
+    width: 3.5rem; height: 4rem; border-radius: 16px;
+    border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.3);
+    color: var(--gold); font: 700 1.8rem/1 var(--font); text-align: center;
+    outline: none; transition: all 0.3s;
+  }
+  .pin-box input:focus { border-color: var(--gold); background: rgba(255, 209, 102, 0.1); box-shadow: 0 0 20px rgba(255, 209, 102, 0.3); transform: translateY(-4px); }
+  .pin-box input.filled { border-color: rgba(255, 255, 255, 0.5); color: #fff; }
+  .pin-box input.wrong { border-color: var(--pink); background: rgba(255, 92, 157, 0.1); }
+  
+  #err-msg { font-size: 0.85rem; color: var(--pink); height: 1.2rem; opacity: 0; transition: 0.3s; font-weight: 600; }
+  #err-msg.show { opacity: 1; }
 
-  /* Grid/Cards */
-  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;width:100%;max-width:900px;margin-top:2rem}
-  .card{background:rgba(30,36,82,.8);border:1px solid #3a4280;border-radius:16px;padding:1.5rem;text-align:center}
-  .card h3{font-size:1.6rem;color:#f5c542;margin-bottom:.5rem}
-  .card p{font-size:.9rem;color:#b9c2e0;line-height:1.4}
+  /* =========================================
+     DECK & SLIDES
+     ========================================= */
+  #deck { position: fixed; inset: 0; z-index: 1; opacity: 0; transition: opacity 1s; }
+  body.started #deck { opacity: 1; }
+  
+  .slide {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 2rem 1.5rem 8rem; opacity: 0; visibility: hidden;
+    transform: scale(1.05) translateY(20px); transition: all 0.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 2; }
+  .slide.exit { opacity: 0; transform: scale(0.95) translateY(-20px); }
 
-  /* Lesson List */
-  .list{display:flex;flex-direction:column;gap:1rem;margin-top:2rem;max-width:800px;text-align:left}
-  .list div{display:flex;gap:1rem;align-items:center;font-size:clamp(1rem,2vw,1.3rem);color:#0b102a}
-  .list div::before{content:"";width:12px;height:12px;background:#e0b020;border-radius:3px;transform:rotate(45deg);flex-shrink:0}
+  /* Staggered Content Animations */
+  .slide-content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1000px; }
+  .slide.active .anim { animation: slideUp 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+  .slide.active .anim:nth-child(1) { animation-delay: 0.1s; }
+  .slide.active .anim:nth-child(2) { animation-delay: 0.2s; }
+  .slide.active .anim:nth-child(3) { animation-delay: 0.3s; }
+  .slide.active .anim:nth-child(4) { animation-delay: 0.4s; }
+  .slide.active .anim:nth-child(5) { animation-delay: 0.5s; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(40px) rotateX(10deg); } }
+
+  /* Typography */
+  .eyebrow { font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase; font-weight: 800; color: var(--gold); margin-bottom: 1.2rem; text-shadow: 0 0 20px rgba(255, 209, 102, 0.4); }
+  .title { font-size: clamp(2.5rem, 8vw, 6rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, #A0A5C0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .name { font-size: clamp(1.8rem, 5vw, 3.5rem); font-weight: 800; color: var(--gold); margin-bottom: 1.5rem; }
+  .subtitle { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted); font-style: italic; }
+  
+  .gold-rule { width: 80px; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 auto 1.5rem; }
+
+  /* Glass Cards */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; width: 100%; margin-top: 2rem; perspective: 1000px; }
+  .card { 
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 2rem 1.5rem; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    transition: transform 0.4s, box-shadow 0.4s, border-color 0.4s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .card:hover { transform: translateY(-10px) rotateX(5deg); border-color: rgba(255, 209, 102, 0.5); box-shadow: 0 20px 40px rgba(255, 209, 102, 0.15); }
+  .card h3 { font-size: 1.6rem; color: var(--gold); margin-bottom: 1rem; font-weight: 800; }
+  .card p { font-size: 1rem; color: var(--muted); line-height: 1.6; }
+
+  /* List */
+  .lesson-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem; text-align: left; width: 100%; max-width: 800px; }
+  .lesson-list div { display: flex; align-items: flex-start; gap: 1.2rem; font-size: clamp(1.1rem, 2.5vw, 1.4rem); font-weight: 500; background: var(--glass); padding: 1.2rem 1.5rem; border-radius: 16px; border: 1px solid var(--glass-border); }
+  .lesson-list div::before { content: ""; width: 14px; height: 14px; background: var(--gold); border-radius: 4px; transform: rotate(45deg); flex-shrink: 0; margin-top: 0.3rem; box-shadow: 0 0 10px var(--gold); }
 
   /* Video */
-  .vid{width:100%;max-width:750px;max-height:55vh;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);background:#000;outline:none}
+  .video-wrapper { width: 100%; max-width: 850px; margin-top: 1rem; border-radius: 20px; padding: 4px; background: linear-gradient(45deg, var(--pink), var(--violet), var(--cyan)); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+  video { width: 100%; max-height: 55vh; border-radius: 16px; background: #000; outline: none; display: block; }
 
-  /* Controls */
-  #dots{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:50;opacity:0;transition:.4s}
-  body.started #dots{opacity:1}
-  .dot{width:8px;height:8px;border-radius:50%;border:0;background:rgba(255,255,255,.3);cursor:pointer;transition:.3s}
-  .dot.on{background:#f5c542;width:20px;border-radius:4px}
-  body.light .dot{background:rgba(11,16,42,.2)}
-  body.light .dot.on{background:#e0b020}
+  /* =========================================
+     BOTTOM CONTROLS
+     ========================================= */
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; padding: 1.5rem 2rem;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    display: flex; justify-content: space-between; align-items: flex-end;
+    z-index: 50; pointer-events: none; background: linear-gradient(to top, rgba(5,5,10,0.9) 0%, transparent 100%);
+    opacity: 0; transition: opacity 0.6s;
+  }
+  body.started .bottom-bar { opacity: 1; }
+  .bottom-bar > * { pointer-events: auto; }
 
-  #ctrl{position:fixed;bottom:1.2rem;right:1.2rem;display:flex;gap:.4rem;z-index:50;opacity:0;transition:.4s;background:rgba(0,0,0,.3);padding:.4rem;border-radius:50px;backdrop-filter:blur(8px)}
-  body.started #ctrl{opacity:1}
-  #ctrl button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:1rem;cursor:pointer;display:grid;place-items:center;transition:.2s}
-  #ctrl button:hover{background:rgba(255,255,255,.25)}
-  #ctrl button[hidden]{display:none}
-  body.light #ctrl{background:rgba(255,255,255,.4)}
-  body.light #ctrl button{color:#0b102a;border-color:rgba(11,16,42,.2);background:rgba(255,255,255,.6)}
+  #counter { font-size: 0.85rem; letter-spacing: 0.15em; color: var(--muted); font-weight: 700; background: var(--glass); padding: 0.6rem 1rem; border-radius: 12px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+  
+  #dots { display: flex; gap: 0.6rem; position: absolute; left: 50%; bottom: 1.8rem; transform: translateX(-50%); background: var(--glass); padding: 0.6rem 1rem; border-radius: 20px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); cursor: pointer; transition: 0.3s; }
+  .dot.on { background: var(--gold); width: 24px; border-radius: 4px; box-shadow: 0 0 10px var(--gold); }
 
-  #count{position:fixed;bottom:1.8rem;left:1.5rem;font-size:.75rem;letter-spacing:.1em;color:rgba(255,255,255,.5);opacity:0;transition:.4s;z-index:50}
-  body.started #count{opacity:1}
-  body.light #count{color:rgba(11,16,42,.6)}
+  #controls { display: flex; gap: 0.5rem; background: var(--glass); padding: 0.5rem; border-radius: 50px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  #controls button { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: 0.2s; }
+  #controls button:hover { background: rgba(255,255,255,0.15); color: var(--gold); transform: scale(1.1); }
+  #controls button:active { transform: scale(0.95); }
+  #controls button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  #controls button[hidden] { display: none; }
 
-  /* Mobile Fixes */
-  @media(max-width:768px){
-    .g3{grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
-    .slide{justify-content:flex-start;padding-top:3rem}
-    .card{padding:1rem}
-    .card h3{font-size:1.3rem}
-    .list{gap:.8rem}
-    .vid{max-height:40vh}
+  /* =========================================
+     RESPONSIVE DESIGN
+     ========================================= */
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 600px) {
+    .slide { padding-top: 3rem; justify-content: flex-start; }
+    .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
+    .card { padding: 1.5rem; }
+    .lesson-list div { padding: 1rem; font-size: 1rem; }
+    
+    .bottom-bar { flex-direction: column; align-items: center; gap: 1rem; padding-bottom: 1.5rem; }
+    #dots { position: static; transform: none; order: 1; }
+    #controls { width: 100%; justify-content: center; max-width: 280px; order: 2; }
+    #counter { order: 3; margin-top: 0.5rem; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+    
+    video { max-height: 35vh; }
   }
 </style>
 </head>
 <body>
 
-<!-- Background Music (Replace src with your own MP3) -->
-<audio id="audio" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=happy-birthday-127955.mp3"></audio>
+<!-- Background Audio -->
+<audio id="bg-music" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=happy-birthday-127955.mp3"></audio>
 
+<!-- Cinematic Background -->
+<div class="aurora">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Confetti Canvas -->
+<canvas id="confetti-canvas"></canvas>
 <div id="prog"></div>
 
-<!-- Lock -->
+<!-- Lock Screen -->
 <div id="lock">
-  <div class="lc">
-    <div class="eyebrow">A Private Premiere</div>
+  <div class="lock-card">
+    <div class="eyebrow" style="margin-bottom: 0.5rem;">A Private Premiere</div>
     <h1>Enter the code</h1>
     <p>Four digits to unlock your surprise.</p>
-    <div class="pin" id="pin">
-      <input type="tel" maxlength="1" inputmode="numeric"><input type="tel" maxlength="1" inputmode="numeric"><input type="tel" maxlength="1" inputmode="numeric"><input type="tel" maxlength="1" inputmode="numeric">
+    <div class="pin-box" id="pin-box">
+      <input type="tel" maxlength="1" inputmode="numeric">
+      <input type="tel" maxlength="1" inputmode="numeric">
+      <input type="tel" maxlength="1" inputmode="numeric">
+      <input type="tel" maxlength="1" inputmode="numeric">
     </div>
-    <div id="err">That's not it. Try again.</div>
+    <div id="err-msg">That's not it. Try again.</div>
   </div>
 </div>
 
-<!-- Deck -->
+<!-- Main Deck -->
 <div id="deck">
-  <section class="slide active b1" data-dur="5000">
-    <div class="eyebrow">A Birthday Tribute</div>
-    <div class="rule"></div>
-    <h1 class="ttl">Happy Birthday</h1>
-    <h2 class="name">Sir Jacob Emmanuel</h2>
-    <p style="color:#b9c2e0;font-style:italic">From your students — with gratitude and respect</p>
-  </section>
-
-  <section class="slide b2" data-dur="7000">
-    <div class="eyebrow">To a teacher who…</div>
-    <div class="g3">
-      <div class="card"><h3>Patient.</h3><p>You never once gave up on a hard question.</p></div>
-      <div class="card"><h3>Brilliant.</h3><p>You made complicated things finally make sense.</p></div>
-      <div class="card"><h3>Kind.</h3><p>You treated every one of us like we mattered.</p></div>
+  
+  <!-- Slide 1 -->
+  <section class="slide active" data-dur="6000">
+    <div class="slide-content">
+      <div class="eyebrow anim">A Birthday Tribute</div>
+      <div class="gold-rule anim"></div>
+      <h1 class="title anim">Happy Birthday</h1>
+      <h2 class="name anim">Sir Jacob Emmanuel</h2>
+      <p class="subtitle anim">From your students — with gratitude and respect</p>
     </div>
   </section>
 
-  <section class="slide b3" data-dur="8000">
-    <div class="eyebrow">What we carry with us</div>
-    <h2 style="font-size:2.5rem;font-weight:800">Lessons beyond the syllabus</h2>
-    <div class="rule" style="margin:1rem 0"></div>
-    <div class="list">
-      <div>How to think, not just what to memorise.</div>
-      <div>That getting it wrong is part of getting it right.</div>
-      <div>To show up properly — even on the hard days.</div>
-      <div>That respect is earned by giving it first.</div>
+  <!-- Slide 2 -->
+  <section class="slide" data-dur="8000">
+    <div class="slide-content">
+      <div class="eyebrow anim">To a teacher who…</div>
+      <div class="grid-3">
+        <div class="card anim"><h3>Patient.</h3><p>You never once gave up on a hard question.</p></div>
+        <div class="card anim"><h3>Brilliant.</h3><p>You made complicated things finally make sense.</p></div>
+        <div class="card anim"><h3>Kind.</h3><p>You treated every one of us like we mattered.</p></div>
+      </div>
     </div>
   </section>
 
-  <section class="slide b4" data-dur="7000">
-    <div class="eyebrow">Wishes for the year ahead</div>
-    <div class="g3">
-      <div class="card"><h3>Health</h3><p>Strength and rest in equal measure.</p></div>
-      <div class="card"><h3>Joy</h3><p>The loud kind, and the quiet kind.</p></div>
-      <div class="card"><h3>Success</h3><p>Every good thing you've earned, and then some.</p></div>
+  <!-- Slide 3 -->
+  <section class="slide" data-dur="9000">
+    <div class="slide-content">
+      <div class="eyebrow anim">What we carry with us</div>
+      <h2 class="title anim" style="font-size: clamp(2rem, 5vw, 3rem);">Lessons beyond the syllabus</h2>
+      <div class="gold-rule anim" style="margin: 1rem 0;"></div>
+      <div class="lesson-list">
+        <div class="anim">How to think, not just what to memorise.</div>
+        <div class="anim">That getting it wrong is part of getting it right.</div>
+        <div class="anim">To show up properly — even on the hard days.</div>
+        <div class="anim">That respect is earned by giving it first.</div>
+      </div>
     </div>
   </section>
 
-  <!-- VIDEO SLIDE -->
-  <section class="slide b5" data-dur="15000">
-    <div class="eyebrow">A Special Message</div>
-    <h2 style="font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:1.5rem">Press play to watch.</h2>
-    
-    <!-- Your Imgur Video -->
-    <video id="bdayVid" class="vid" controls playsinline>
-      <source src="https://i.imgur.com/M84wEBv.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
+  <!-- Slide 4 -->
+  <section class="slide" data-dur="8000">
+    <div class="slide-content">
+      <div class="eyebrow anim">Wishes for the year ahead</div>
+      <div class="grid-3">
+        <div class="card anim"><h3>Health</h3><p>Strength and rest in equal measure.</p></div>
+        <div class="card anim"><h3>Joy</h3><p>The loud kind, and the quiet kind.</p></div>
+        <div class="card anim"><h3>Success</h3><p>Every good thing you've earned, and then some.</p></div>
+      </div>
+    </div>
   </section>
 
-  <section class="slide b6">
-    <h1 class="ttl" style="font-size:clamp(2.2rem,6vw,4.5rem)">Thank you, Sir.</h1>
-    <div class="rule" style="margin:1.5rem auto"></div>
-    <p class="msg">Thank you for your patience, your wisdom, and for making every lesson count. May this new year bring you good health, peace, and plenty of reasons to smile. Enjoy your day — you've earned it.</p>
-    <p class="sign">— with respect and gratitude, from all of us</p>
+  <!-- Slide 5 (Video) -->
+  <section class="slide" data-dur="20000">
+    <div class="slide-content">
+      <div class="eyebrow anim">A Special Message</div>
+      <h2 class="title anim" style="font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 1.5rem;">Press play to watch.</h2>
+      <div class="video-wrapper anim">
+        <video id="bday-vid" controls playsinline webkit-playsinline>
+          <source src="https://i.imgur.com/M84wEBv.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
   </section>
+
+  <!-- Slide 6 -->
+  <section class="slide">
+    <div class="slide-content">
+      <h1 class="title anim" style="font-size: clamp(2.5rem, 6vw, 5rem);">Thank you, Sir.</h1>
+      <div class="gold-rule anim" style="margin: 1.5rem auto;"></div>
+      <p class="subtitle anim" style="font-style: normal; font-size: clamp(1.1rem, 2.5vw, 1.3rem); line-height: 1.8; max-width: 800px;">
+        Thank you for your patience, your wisdom, and for making every lesson count. 
+        May this new year bring you good health, peace, and plenty of reasons to smile. 
+        Enjoy your day — you've earned it.
+      </p>
+      <p class="name anim" style="font-size: 1.2rem; margin-top: 2rem;">— with respect and gratitude, from all of us</p>
+    </div>
+  </section>
+
 </div>
 
-<div id="count"><span id="cur">01</span> / <span id="tot"></span></div>
-<div id="dots"></div>
-<div id="ctrl">
-  <button id="mute">🔊</button>
-  <button id="play">❚❚</button>
-  <button id="prev">‹</button>
-  <button id="next">›</button>
+<!-- Bottom Controls -->
+<div class="bottom-bar">
+  <div id="counter"><span id="current">01</span> / <span id="total"></span></div>
+  <div id="dots"></div>
+  <div id="controls">
+    <button id="btn-mute" aria-label="Toggle Music">🔊</button>
+    <button id="btn-play" aria-label="Pause Slideshow">❚❚</button>
+    <button id="btn-prev" aria-label="Previous Slide">‹</button>
+    <button id="btn-next" aria-label="Next Slide">›</button>
+  </div>
 </div>
 
 <script>
-const $ = s => document.querySelector(s);
-const PIN = "8639";
+  const PIN = "8639";
 
-/* --- 1. Lock Screen & Audio --- */
-const ins = [...document.querySelectorAll('.pin input')];
-const lock = $('#lock'), pinBox = $('#pin'), err = $('#err'), audio = $('#audio');
-let locked = true;
-
-ins.forEach((el, i) => {
-  el.oninput = () => {
-    el.value = el.value.replace(/\D/g, '').slice(0, 1);
-    el.classList.toggle('f', !!el.value);
-    el.classList.remove('w'); err.classList.remove('show');
-    if (el.value && i < 3) ins[i+1].focus();
-    if (ins.every(x => x.value)) check();
-  };
-  el.onkeydown = e => { if (e.key === 'Backspace' && !el.value && i > 0) ins[i-1].focus(); };
-});
-
-function check() {
-  if (!locked) return;
-  locked = false;
-  if (ins.map(x => x.value).join('') === PIN) {
-    lock.classList.add('out');
-    document.body.classList.add('started');
-    audio.volume = 0.4;
-    audio.play().catch(()=>{});
-    setTimeout(() => { lock.style.display = 'none'; resetTimer(); }, 500);
-  } else {
-    pinBox.classList.add('shake'); ins.forEach(x => x.classList.add('w')); err.classList.add('show');
-    setTimeout(() => {
-      pinBox.classList.remove('shake'); ins.forEach(x => { x.value = ''; x.classList.remove('w', 'f'); });
-      ins[0].focus(); locked = true;
-    }, 500);
+  /* =========================================
+     1. CONFETTI ENGINE
+     ========================================= */
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let confetti = [];
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-}
-ins[0].focus();
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-/* --- 2. Deck & Auto-advance --- */
-const slides = [...document.querySelectorAll('.slide')];
-const dots = $('#dots'), prog = $('#prog'), playBtn = $('#play'), video = $('#bdayVid');
-let idx = 0, timer, paused = false;
-
-$('#tot').textContent = String(slides.length).padStart(2, '0');
-slides.forEach((_, i) => {
-  const d = document.createElement('button');
-  d.className = 'dot'; d.onclick = () => go(i);
-  dots.appendChild(d);
-});
-$('.dot').classList.add('on');
-
-function go(n) {
-  if (n < 0 || n >= slides.length || n === idx) return;
-  
-  // Pause video if navigating away from it
-  if(idx === 4 && video) video.pause(); 
-
-  slides[idx].classList.remove('active');
-  idx = n;
-  slides[idx].classList.add('active');
-  slides[idx].scrollTop = 0;
-  
-  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === idx));
-  $('#cur').textContent = String(idx + 1).padStart(2, '0');
-  document.body.classList.toggle('light', slides[idx].classList.contains('b3'));
-  
-  if (!paused) resetTimer();
-}
-
-function resetTimer() {
-  clearTimeout(timer);
-  if (idx === slides.length - 1) {
-    prog.style.transition = 'width .3s'; prog.style.width = '100%'; playBtn.hidden = true; return;
+  function fireConfetti() {
+    const colors = ['#FFD166', '#FF5C9D', '#38E8FF', '#8B5CF6', '#FFFFFF'];
+    for (let i = 0; i < 150; i++) {
+      confetti.push({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+        y: canvas.height / 2 + (Math.random() - 0.5) * 200,
+        w: Math.random() * 10 + 5,
+        h: Math.random() * 10 + 5,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 20,
+        vy: (Math.random() - 1) * 20,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.4
+      });
+    }
+    if (!animating) animateConfetti();
   }
-  playBtn.hidden = false;
-  const dur = slides[idx].dataset.dur || 6000;
-  prog.style.transition = 'none'; prog.style.width = '0%';
-  void prog.offsetWidth;
-  prog.style.transition = `width ${dur}ms linear`; prog.style.width = '100%';
-  timer = setTimeout(() => go(idx + 1), dur);
-}
 
-/* --- 3. Video Logic (Pause timer while video plays) --- */
-if(video) {
-  video.onplay = () => {
-    clearTimeout(timer);
-    prog.style.transition = 'none'; prog.style.width = '0%'; 
-  };
-  video.onpause = () => {
-    if(video.ended || !video.paused) return; 
-    resetTimer(); 
-  };
-  video.onended = () => {
-    resetTimer(); 
-  };
-}
+  let animating = false;
+  function animateConfetti() {
+    if (confetti.length === 0) { animating = false; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+    animating = true;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 0; i < confetti.length; i++) {
+      let p = confetti[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vy += 0.5; // gravity
+      p.vx *= 0.98; // drag
+      p.rot += p.vr;
+      
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      
+      if (p.y > canvas.height + 50) { confetti.splice(i, 1); i--; }
+    }
+    requestAnimationFrame(animateConfetti);
+  }
 
-/* --- 4. Controls --- */
-$('#next').onclick = () => go(idx + 1);
-$('#prev').onclick = () => go(idx - 1);
-playBtn.onclick = () => {
-  paused = !paused;
-  playBtn.textContent = paused ? "▶" : "❚❚";
-  if (paused) { clearTimeout(timer); prog.style.transition = 'none'; prog.style.width = getComputedStyle(prog).width; }
-  else resetTimer();
-};
-$('#mute').onclick = (e) => {
-  audio.muted = !audio.muted;
-  e.target.textContent = audio.muted ? "🔇" : "🔊";
-};
+  /* =========================================
+     2. LOCK SCREEN & AUDIO
+     ========================================= */
+  const ins = [...document.querySelectorAll('.pin-box input')];
+  const lock = document.getElementById('lock');
+  const pinBox = document.getElementById('pin-box');
+  const errMsg = document.getElementById('err-msg');
+  const audio = document.getElementById('bg-music');
+  let isLocked = true;
 
-// Keyboard
-document.addEventListener('keydown', e => {
-  if (!document.body.classList.contains('started')) return;
-  if (["ArrowRight", " ", "Enter"].includes(e.key)) go(idx + 1);
-  if (["ArrowLeft", "Backspace"].includes(e.key)) go(idx - 1);
-});
+  ins.forEach((el, i) => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/\D/g, '').slice(0, 1);
+      el.classList.toggle('filled', !!el.value);
+      el.classList.remove('wrong'); errMsg.classList.remove('show');
+      
+      if (el.value && i < 3) ins[i + 1].focus();
+      if (ins.every(x => x.value)) checkPin();
+    });
 
-// Swipe & Click
-let sx = 0;
-$('#deck').addEventListener('touchstart', e => sx = e.touches[0].clientX, {passive: true});
-$('#deck').addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - sx;
-  if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1);
-}, {passive: true});
-$('#deck').addEventListener('click', e => {
-  if (e.target.closest('#ctrl, #dots, video')) return; // Ignore clicks on video/controls
-  go(e.clientX > window.innerWidth / 2 ? idx + 1 : idx - 1);
-});
-</script>
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0) ins[i - 1].focus();
+    });
+  });
+
+  function checkPin() {
+    if (!isLocked) return;
+    isLocked = false;
+
+    if (ins.map(x => x.value).join('') === PIN) {
+      lock.classList.add('out');
+      document.body.classList.add('started');
+      
+      fireConfetti();
+      audio.volume = 0.4;
+      audio.play().catch(e => console.log('Audio block:', e));
+      
+      setTimeout(() => { lock.style.display = 'none'; resetTimer(); }, 800);
+    } else {
+      pinBox.classList.add('shake'); 
+      ins.forEach(x => x.classList.add('wrong')); 
+      errMsg.classList.add('show');
+      
+      setTimeout(() => {
+        pinBox.classList.remove('shake'); 
+        ins.forEach(x => { x.value = ''; x.classList.remove('wrong', 'filled'); });
+        ins[0].focus(); isLocked = true;
+      }, 600);
+    }
+  }
+  
+  setTimeout(() => ins[0].focus(), 500);        /* =========================================
+           3. DECK & TIMERS
+           ========================================= */
+        const slides = [...document.querySelectorAll('.slide')];
+        const dotsContainer = document.getElementById('dots');
+        const progBar = document.getElementById('prog');
+        const btnPlay = document.getElementById('btn-play');
+        const video = document.getElementById('bday-vid');
+        
+        let currentIdx = 0;
+        let timer;
+        let isPaused = false;
+
+        document.getElementById('total').textContent = String(slides.length).padStart(2, '0');
+        slides.forEach((_, i) => {
+          const dot = document.createElement('button');
+          dot.className = 'dot';
+          dot.addEventListener('click', () => goToSlide(i));
+          dotsContainer.appendChild(dot);
+        });
+
+        function goToSlide(n) {
+          if (n < 0 || n >= slides.length || n === currentIdx) return;
+
+          if (currentIdx === 4 && video) video.pause(); 
+
+          slides[currentIdx].classList.remove('active');
+          currentIdx = n;
+          slides[currentIdx].classList.add('active');
+          slides[currentIdx].scrollTop = 0; 
+
+          document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === currentIdx));
+          document.getElementById('current').textContent = String(currentIdx + 1).padStart(2, '0');
+
+          if (!isPaused) resetTimer();
+        }
+
+        function resetTimer() {
+          clearTimeout(timer);
+          
+          if (currentIdx === slides.length - 1) {
+            progBar.style.transition = 'width 0.3s'; progBar.style.width = '100%'; 
+            btnPlay.style.display = 'none'; 
+            return;
+          }
+          
+          btnPlay.style.display = 'grid';
+          const duration = parseInt(slides[currentIdx].dataset.dur) || 6000;
+          
+          progBar.style.transition = 'none'; progBar.style.width = '0%';
+          void progBar.offsetWidth; 
+          progBar.style.transition = `width ${duration}ms linear`; progBar.style.width = '100%';
+          
+          timer = setTimeout(() => goToSlide(currentIdx + 1), duration);
+        }
+
+        /* =========================================
+           4. VIDEO LOGIC
+           ========================================= */
+        if (video) {
+          video.addEventListener('play', () => {
+            clearTimeout(timer);
+            progBar.style.transition = 'none'; progBar.style.width = '0%'; 
+          });
+          video.addEventListener('ended', () => { resetTimer(); });
+          video.addEventListener('pause', () => { if (!video.ended) resetTimer(); });
+        }
+
+        /* =========================================
+           5. CONTROLS & NAVIGATION
+           ========================================= */
+        document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentIdx + 1));
+        document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentIdx - 1));
+
+        btnPlay.addEventListener('click', () => {
+          isPaused = !isPaused;
+          btnPlay.innerHTML = isPaused ? "▶" : "❚❚";
+          
+          if (isPaused) {
+            clearTimeout(timer);
+            progBar.style.transition = 'none'; progBar.style.width = getComputedStyle(progBar).width;
+          } else {
+            resetTimer();
+          }
+        });
+
+        document.getElementById('btn-mute').addEventListener('click', (e) => {
+          audio.muted = !audio.muted;
+          e.target.innerHTML = audio.muted ? "🔇" : "🔊";
+        });
+
+        document.addEventListener('keydown', e => {
+          if (!document.body.classList.contains('started')) return;
+          if (["ArrowRight", " ", "Enter"].includes(e.key)) goToSlide(currentIdx + 1);
+          if (["ArrowLeft", "Backspace"].includes(e.key)) goToSlide(currentIdx - 1);
+        });
+
+        let startX = 0, startY = 0, isSwiping = false;
+        
+        document.getElementById('deck').addEventListener('touchstart', e => {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          isSwiping = false;
+        }, { passive: true });
+
+        document.getElementById('deck').addEventListener('touchmove', e => {
+          if (!startX || !startY) return;
+          let dx = e.touches[0].clientX - startX;
+          let dy = e.touches[0].clientY - startY;
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
+            isSwiping = true;
+          }
+        }, { passive: true });
+
+        document.getElementById('deck').addEventListener('touchend', e => {
+          if (!startX || !startY) return;
+          let dx = e.changedTouches[0].clientX - startX;
+          let dy = e.changedTouches[0].clientY - startY;
+          
+          if (isSwiping && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            goToSlide(dx < 0 ? currentIdx + 1 : currentIdx - 1);
+          }
+          startX = 0; startY = 0;
+        }, { passive: true });
+    </script>
 </body>
 </html>
