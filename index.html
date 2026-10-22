@@ -168,23 +168,34 @@
   #controls button[hidden] { display: none; }
 
   /* =========================================
-     RESPONSIVE DESIGN
+     RESPONSIVE DESIGN (MOBILE FIXES)
      ========================================= */
   @media (max-width: 900px) {
     .grid-3 { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 600px) {
-    .slide { padding-top: 3rem; justify-content: flex-start; }
+    /* Give lots of room at the bottom so text doesn't hide behind controls */
+    .slide { padding: 2rem 1rem 10rem; justify-content: flex-start; }
     .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
-    .card { padding: 1.5rem; }
-    .lesson-list div { padding: 1rem; font-size: 1rem; }
     
-    .bottom-bar { flex-direction: column; align-items: center; gap: 1rem; padding-bottom: 1.5rem; }
-    #dots { position: static; transform: none; order: 1; }
+    /* Remove heavy blur on mobile to fix the "yellow block" rendering glitch */
+    .card, .lock-card, .bottom-bar, #controls, #dots, #counter { 
+      backdrop-filter: none !important; 
+      -webkit-backdrop-filter: none !important; 
+    }
+    .card { background: rgba(30, 36, 82, 0.95); padding: 1.2rem; }
+    .lock-card { background: rgba(20, 24, 55, 0.98); }
+    #controls { background: rgba(30, 36, 82, 0.95); }
+    #dots { background: rgba(30, 36, 82, 0.95); }
+    
+    /* Stack controls neatly on mobile */
+    .bottom-bar { flex-direction: column; gap: 1rem; padding: 1rem; padding-bottom: 2rem; }
+    #dots { position: static; transform: none; order: 1; align-self: center; }
     #controls { width: 100%; justify-content: center; max-width: 280px; order: 2; }
-    #counter { order: 3; margin-top: 0.5rem; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+    #counter { display: none; } /* Hide counter on mobile to save space */
     
+    .lesson-list div { padding: 1rem; font-size: 1rem; }
     video { max-height: 35vh; }
   }
 </style>
@@ -320,30 +331,43 @@
   const PIN = "8639";
 
   /* =========================================
-     1. CONFETTI ENGINE
+     1. CONFETTI ENGINE (WITH DPR FIX)
      ========================================= */
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
   let confetti = [];
+  let animating = false;
   
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
   function fireConfetti() {
     const colors = ['#FFD166', '#FF5C9D', '#38E8FF', '#8B5CF6', '#FFFFFF'];
-    for (let i = 0; i < 150; i++) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    
+    for (let i = 0; i < 120; i++) {
       confetti.push({
-        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
-        y: canvas.height / 2 + (Math.random() - 0.5) * 200,
+        x: w / 2 + (Math.random() - 0.5) * 200,
+        y: h / 2 + (Math.random() - 0.5) * 200,
         w: Math.random() * 10 + 5,
         h: Math.random() * 10 + 5,
         c: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 20,
-        vy: (Math.random() - 1) * 20,
+        vx: (Math.random() - 0.5) * 15,
+        vy: (Math.random() - 1) * 15,
         rot: Math.random() * Math.PI,
         vr: (Math.random() - 0.5) * 0.4
       });
@@ -351,16 +375,22 @@
     if (!animating) animateConfetti();
   }
 
-  let animating = false;
   function animateConfetti() {
-    if (confetti.length === 0) { animating = false; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    
+    if (confetti.length === 0) { 
+      animating = false; 
+      ctx.clearRect(0, 0, w, h); 
+      return; 
+    }
     animating = true;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, w, h);
     
     for (let i = 0; i < confetti.length; i++) {
       let p = confetti[i];
       p.x += p.vx; p.y += p.vy;
-      p.vy += 0.5; // gravity
+      p.vy += 0.4; // gravity
       p.vx *= 0.98; // drag
       p.rot += p.vr;
       
@@ -371,7 +401,7 @@
       ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
       ctx.restore();
       
-      if (p.y > canvas.height + 50) { confetti.splice(i, 1); i--; }
+      if (p.y > h + 50) { confetti.splice(i, 1); i--; }
     }
     requestAnimationFrame(animateConfetti);
   }
@@ -394,163 +424,164 @@
       
       if (el.value && i < 3) ins[i + 1].focus();
       if (ins.every(x => x.value)) checkPin();
+    });      el.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !el.value && i > 0) ins[i - 1].focus();
+      });
     });
 
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Backspace' && !el.value && i > 0) ins[i - 1].focus();
-    });
-  });
+    function checkPin() {
+      if (!isLocked) return;
+      isLocked = false;
 
-  function checkPin() {
-    if (!isLocked) return;
-    isLocked = false;
-
-    if (ins.map(x => x.value).join('') === PIN) {
-      lock.classList.add('out');
-      document.body.classList.add('started');
-      
-      fireConfetti();
-      audio.volume = 0.4;
-      audio.play().catch(e => console.log('Audio block:', e));
-      
-      setTimeout(() => { lock.style.display = 'none'; resetTimer(); }, 800);
-    } else {
-      pinBox.classList.add('shake'); 
-      ins.forEach(x => x.classList.add('wrong')); 
-      errMsg.classList.add('show');
-      
-      setTimeout(() => {
-        pinBox.classList.remove('shake'); 
-        ins.forEach(x => { x.value = ''; x.classList.remove('wrong', 'filled'); });
-        ins[0].focus(); isLocked = true;
-      }, 600);
+      if (ins.map(x => x.value).join('') === PIN) {
+        lock.classList.add('out');
+        document.body.classList.add('started');
+        
+        fireConfetti();
+        audio.volume = 0.4;
+        audio.play().catch(e => console.log('Audio block:', e));
+        
+        setTimeout(() => { lock.style.display = 'none'; resetTimer(); }, 800);
+      } else {
+        pinBox.classList.add('shake'); 
+        ins.forEach(x => x.classList.add('wrong')); 
+        errMsg.classList.add('show');
+        
+        setTimeout(() => {
+          pinBox.classList.remove('shake'); 
+          ins.forEach(x => { x.value = ''; x.classList.remove('wrong', 'filled'); });
+          ins[0].focus(); isLocked = true;
+        }, 600);
+      }
     }
-  }
-  
-  setTimeout(() => ins[0].focus(), 500);        /* =========================================
-           3. DECK & TIMERS
-           ========================================= */
-        const slides = [...document.querySelectorAll('.slide')];
-        const dotsContainer = document.getElementById('dots');
-        const progBar = document.getElementById('prog');
-        const btnPlay = document.getElementById('btn-play');
-        const video = document.getElementById('bday-vid');
-        
-        let currentIdx = 0;
-        let timer;
-        let isPaused = false;
+    
+    setTimeout(() => ins[0].focus(), 500);
 
-        document.getElementById('total').textContent = String(slides.length).padStart(2, '0');
-        slides.forEach((_, i) => {
-          const dot = document.createElement('button');
-          dot.className = 'dot';
-          dot.addEventListener('click', () => goToSlide(i));
-          dotsContainer.appendChild(dot);
-        });
+    /* =========================================
+       3. DECK & TIMERS
+       ========================================= */
+    const slides = [...document.querySelectorAll('.slide')];
+    const dotsContainer = document.getElementById('dots');
+    const progBar = document.getElementById('prog');
+    const btnPlay = document.getElementById('btn-play');
+    const video = document.getElementById('bday-vid');
+    
+    let currentIdx = 0;
+    let timer;
+    let isPaused = false;
 
-        function goToSlide(n) {
-          if (n < 0 || n >= slides.length || n === currentIdx) return;
+    document.getElementById('total').textContent = String(slides.length).padStart(2, '0');
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'dot';
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    document.querySelectorAll('.dot')[0].classList.add('on');
 
-          if (currentIdx === 4 && video) video.pause(); 
+    function goToSlide(n) {
+      if (n < 0 || n >= slides.length || n === currentIdx) return;
 
-          slides[currentIdx].classList.remove('active');
-          currentIdx = n;
-          slides[currentIdx].classList.add('active');
-          slides[currentIdx].scrollTop = 0; 
+      if (currentIdx === 4 && video) video.pause(); 
 
-          document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === currentIdx));
-          document.getElementById('current').textContent = String(currentIdx + 1).padStart(2, '0');
+      slides[currentIdx].classList.remove('active');
+      currentIdx = n;
+      slides[currentIdx].classList.add('active');
+      slides[currentIdx].scrollTop = 0; 
 
-          if (!isPaused) resetTimer();
-        }
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === currentIdx));
+      document.getElementById('current').textContent = String(currentIdx + 1).padStart(2, '0');
 
-        function resetTimer() {
-          clearTimeout(timer);
-          
-          if (currentIdx === slides.length - 1) {
-            progBar.style.transition = 'width 0.3s'; progBar.style.width = '100%'; 
-            btnPlay.style.display = 'none'; 
-            return;
-          }
-          
-          btnPlay.style.display = 'grid';
-          const duration = parseInt(slides[currentIdx].dataset.dur) || 6000;
-          
-          progBar.style.transition = 'none'; progBar.style.width = '0%';
-          void progBar.offsetWidth; 
-          progBar.style.transition = `width ${duration}ms linear`; progBar.style.width = '100%';
-          
-          timer = setTimeout(() => goToSlide(currentIdx + 1), duration);
-        }
+      if (!isPaused) resetTimer();
+    }
 
-        /* =========================================
-           4. VIDEO LOGIC
-           ========================================= */
-        if (video) {
-          video.addEventListener('play', () => {
-            clearTimeout(timer);
-            progBar.style.transition = 'none'; progBar.style.width = '0%'; 
-          });
-          video.addEventListener('ended', () => { resetTimer(); });
-          video.addEventListener('pause', () => { if (!video.ended) resetTimer(); });
-        }
+    function resetTimer() {
+      clearTimeout(timer);
+      
+      if (currentIdx === slides.length - 1) {
+        progBar.style.transition = 'width 0.3s'; progBar.style.width = '100%'; 
+        btnPlay.style.display = 'none'; 
+        return;
+      }
+      
+      btnPlay.style.display = 'grid';
+      const duration = parseInt(slides[currentIdx].dataset.dur) || 6000;
+      
+      progBar.style.transition = 'none'; progBar.style.width = '0%';
+      void progBar.offsetWidth; 
+      progBar.style.transition = `width ${duration}ms linear`; progBar.style.width = '100%';
+      
+      timer = setTimeout(() => goToSlide(currentIdx + 1), duration);
+    }
 
-        /* =========================================
-           5. CONTROLS & NAVIGATION
-           ========================================= */
-        document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentIdx + 1));
-        document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentIdx - 1));
+    /* =========================================
+       4. VIDEO LOGIC
+       ========================================= */
+    if (video) {
+      video.addEventListener('play', () => {
+        clearTimeout(timer);
+        progBar.style.transition = 'none'; progBar.style.width = '0%'; 
+      });
+      video.addEventListener('ended', () => { resetTimer(); });
+      video.addEventListener('pause', () => { if (!video.ended) resetTimer(); });
+    }
 
-        btnPlay.addEventListener('click', () => {
-          isPaused = !isPaused;
-          btnPlay.innerHTML = isPaused ? "▶" : "❚❚";
-          
-          if (isPaused) {
-            clearTimeout(timer);
-            progBar.style.transition = 'none'; progBar.style.width = getComputedStyle(progBar).width;
-          } else {
-            resetTimer();
-          }
-        });
+    /* =========================================
+       5. CONTROLS & NAVIGATION
+       ========================================= */
+    document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentIdx + 1));
+    document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentIdx - 1));
 
-        document.getElementById('btn-mute').addEventListener('click', (e) => {
-          audio.muted = !audio.muted;
-          e.target.innerHTML = audio.muted ? "🔇" : "🔊";
-        });
+    btnPlay.addEventListener('click', () => {
+      isPaused = !isPaused;
+      btnPlay.innerHTML = isPaused ? "▶" : "❚❚";
+      
+      if (isPaused) {
+        clearTimeout(timer);
+        progBar.style.transition = 'none'; progBar.style.width = getComputedStyle(progBar).width;
+      } else {
+        resetTimer();
+      }
+    });
 
-        document.addEventListener('keydown', e => {
-          if (!document.body.classList.contains('started')) return;
-          if (["ArrowRight", " ", "Enter"].includes(e.key)) goToSlide(currentIdx + 1);
-          if (["ArrowLeft", "Backspace"].includes(e.key)) goToSlide(currentIdx - 1);
-        });
+    document.getElementById('btn-mute').addEventListener('click', (e) => {
+      audio.muted = !audio.muted;
+      e.target.innerHTML = audio.muted ? "🔇" : "🔊";
+    });
 
-        let startX = 0, startY = 0, isSwiping = false;
-        
-        document.getElementById('deck').addEventListener('touchstart', e => {
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-          isSwiping = false;
-        }, { passive: true });
+    document.addEventListener('keydown', e => {
+      if (!document.body.classList.contains('started')) return;
+      if (["ArrowRight", " ", "Enter"].includes(e.key)) goToSlide(currentIdx + 1);
+      if (["ArrowLeft", "Backspace"].includes(e.key)) goToSlide(currentIdx - 1);
+    });
 
-        document.getElementById('deck').addEventListener('touchmove', e => {
-          if (!startX || !startY) return;
-          let dx = e.touches[0].clientX - startX;
-          let dy = e.touches[0].clientY - startY;
-          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
-            isSwiping = true;
-          }
-        }, { passive: true });
+    let startX = 0, startY = 0, isSwiping = false;
+    
+    document.getElementById('deck').addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      isSwiping = false;
+    }, { passive: true });
 
-        document.getElementById('deck').addEventListener('touchend', e => {
-          if (!startX || !startY) return;
-          let dx = e.changedTouches[0].clientX - startX;
-          let dy = e.changedTouches[0].clientY - startY;
-          
-          if (isSwiping && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-            goToSlide(dx < 0 ? currentIdx + 1 : currentIdx - 1);
-          }
-          startX = 0; startY = 0;
-        }, { passive: true });
-    </script>
+    document.getElementById('deck').addEventListener('touchmove', e => {
+      if (!startX || !startY) return;
+      let dx = e.touches[0].clientX - startX;
+      let dy = e.touches[0].clientY - startY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
+        isSwiping = true;
+      }
+    }, { passive: true });
+
+    document.getElementById('deck').addEventListener('touchend', e => {
+      if (!startX || !startY) return;
+      let dx = e.changedTouches[0].clientX - startX;
+      let dy = e.changedTouches[0].clientY - startY;
+      
+      if (isSwiping && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        goToSlide(dx < 0 ? currentIdx + 1 : currentIdx - 1);
+      }
+      startX = 0; startY = 0;
+    }, { passive: true });
+  </script>
 </body>
 </html>
