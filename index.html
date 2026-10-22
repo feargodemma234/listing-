@@ -15,54 +15,106 @@
     font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
     -webkit-font-smoothing:antialiased}
 
-  /* ---------- deck ---------- */
-  .deck{position:fixed;inset:0}
+  /* ---------- auto-advance progress bar ---------- */
+  .progress{
+    position:fixed;top:0;left:0;height:3px;width:0;
+    background:linear-gradient(90deg,#f5c542,#ffd97d);
+    z-index:200;opacity:0;transition:opacity .4s;
+    box-shadow:0 0 14px rgba(245,197,66,.55)
+  }
+  body.started .progress{opacity:1}
+
+  /* ---------- LOCK SCREEN ---------- */
+  .lock{
+    position:fixed;inset:0;z-index:100;
+    display:grid;place-items:center;
+    background:radial-gradient(circle at 30% 20%,#1b1f4b,#05060f 65%);
+    transition:opacity .6s ease;
+    padding:1rem;
+  }
+  .lock.out{opacity:0;pointer-events:none}
+
+  .lock-card{
+    width:min(92vw,400px);
+    padding:2.5rem 2rem 2rem;
+    border-radius:26px;text-align:center;
+    background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.13);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    box-shadow:0 40px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.15);
+    animation:cardIn 1s cubic-bezier(.2,.9,.2,1) both;
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}}
+
+  .lock-card .eyebrow{
+    font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;
+    font-weight:700;color:var(--gold);margin-bottom:1rem
+  }
+  .lock-card h1{font-size:1.5rem;font-weight:800;margin-bottom:.4rem;letter-spacing:-.02em}
+  .lock-card p{font-size:.85rem;color:rgba(255,255,255,.55);margin-bottom:1.8rem;line-height:1.5}
+
+  .pin{display:flex;gap:.6rem;justify-content:center;margin-bottom:1rem}
+  .pin.shake{animation:shake .45s}
+  @keyframes shake{
+    20%,80%{transform:translateX(6px)}
+    30%,50%,70%{transform:translateX(-9px)}
+    40%,60%{transform:translateX(9px)}
+  }
+  .pin input{
+    width:3.4rem;height:3.9rem;border-radius:14px;
+    border:1.5px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.05);
+    color:#fff;font:700 1.5rem/1 inherit;text-align:center;
+    outline:none;caret-color:var(--gold);transition:.2s
+  }
+  .pin input:focus{
+    border-color:var(--gold);background:rgba(245,197,66,.1);
+    transform:translateY(-3px);
+    box-shadow:0 0 0 4px rgba(245,197,66,.15),0 0 24px rgba(245,197,66,.35)
+  }
+  .pin input.filled{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1)}
+  .pin input.wrong{border-color:#ff4d6d;background:rgba(255,77,109,.14)}
+
+  .lock-err{min-height:1.2rem;font-size:.82rem;color:#ff8fa3;opacity:0;transition:.2s}
+  .lock-err.show{opacity:1}
+
+  /* ---------- DECK ---------- */
+  .deck{position:fixed;inset:0;opacity:0;transition:opacity .7s ease}
+  body.started .deck{opacity:1}
+
   .slide{
     position:absolute;inset:0;
     display:flex;flex-direction:column;justify-content:center;
     padding:clamp(1.5rem,5vw,4.5rem);
-    opacity:0;visibility:hidden;
-    transform:scale(1.03);
+    opacity:0;visibility:hidden;transform:scale(1.03);
     transition:opacity .7s ease,transform .9s cubic-bezier(.2,.9,.2,1),visibility .7s;
-    will-change:opacity,transform;
+    will-change:opacity,transform
   }
   .slide.active{opacity:1;visibility:visible;transform:scale(1);z-index:2}
   .slide.exit{opacity:0;transform:scale(.97)}
 
-  /* backgrounds */
   .bg1{background:linear-gradient(135deg,#0b102a 0%,#1b1f4b 100%)}
   .bg2{background:linear-gradient(120deg,#1b1f4b 0%,#4a28a8 100%)}
   .bg3{background:linear-gradient(90deg,#f3f6ff 0%,#ffffff 100%);color:#0b102a}
   .bg4{background:linear-gradient(135deg,#0b102a 0%,#1b1f4b 100%)}
   .bg5{background:linear-gradient(135deg,#4a28a8 0%,#0b102a 100%)}
-  .bg6{background:linear-gradient(120deg,#0b102a 0%,#1b1f4b 100%)}
 
-  /* subtle grain overlay */
   .slide::after{
     content:"";position:absolute;inset:0;pointer-events:none;opacity:.04;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")
   }
   .slide>*{position:relative;z-index:1}
 
-  /* ---------- type ---------- */
   .eyebrow{font-size:clamp(.65rem,1.4vw,.85rem);letter-spacing:.35em;
     text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:1.2rem}
   .bg3 .eyebrow{color:#8a6d0a}
 
-  h1.display{
-    font-size:clamp(2.4rem,8vw,6rem);
-    font-weight:800;letter-spacing:-.02em;line-height:1.02;
-    margin-bottom:.4rem;
-  }
-  h2.name{
-    font-size:clamp(1.6rem,5vw,3.4rem);
-    font-weight:700;color:var(--gold);letter-spacing:-.01em;
-    margin-bottom:2rem;
-  }
-  h2.section{
-    font-size:clamp(1.8rem,5vw,3rem);
-    font-weight:800;letter-spacing:-.02em;margin-bottom:.6rem;
-  }
+  h1.display{font-size:clamp(2.4rem,8vw,6rem);font-weight:800;
+    letter-spacing:-.02em;line-height:1.02;margin-bottom:.4rem}
+  h2.name{font-size:clamp(1.6rem,5vw,3.4rem);font-weight:700;
+    color:var(--gold);letter-spacing:-.01em;margin-bottom:2rem}
+  h2.section{font-size:clamp(1.8rem,5vw,3rem);font-weight:800;
+    letter-spacing:-.02em;margin-bottom:.6rem}
   .bg3 h2.section{color:#0b102a}
 
   .rule{width:90px;height:3px;background:var(--gold);border-radius:2px;margin:0 auto 2rem}
@@ -71,23 +123,17 @@
 
   .tagline{font-size:clamp(.95rem,2vw,1.15rem);color:var(--muted);
     font-style:italic;letter-spacing:.02em}
-  .bg3 .tagline{color:#5c6784}
 
-  .center{text-align:center;align-items:center}
-  .slide.center{display:flex;flex-direction:column;justify-content:center;align-items:center}
+  .slide.center{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 
-  /* ---------- cards ---------- */
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,2vw,1.6rem);
-    width:100%;max-width:1050px;margin-top:2.5rem}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);
+    gap:clamp(.8rem,2vw,1.6rem);width:100%;max-width:1050px;margin-top:2.5rem}
   @media(max-width:720px){.grid3{grid-template-columns:1fr;gap:1rem;margin-top:1.5rem}}
 
   .card{
-    background:var(--card);
-    border:1px solid var(--card-l);
-    border-radius:20px;
+    background:var(--card);border:1px solid var(--card-l);border-radius:20px;
     padding:clamp(1.2rem,3vw,2.2rem) clamp(1rem,2.5vw,1.8rem);
-    text-align:center;
-    transition:transform .3s,border-color .3s,box-shadow .3s;
+    text-align:center;transition:transform .3s,border-color .3s,box-shadow .3s
   }
   .card:hover{transform:translateY(-6px);border-color:var(--gold);
     box-shadow:0 20px 50px rgba(0,0,0,.4)}
@@ -96,55 +142,47 @@
   .card .bar{width:50px;height:2px;background:var(--card-l);margin:0 auto 1rem}
   .card p{font-size:clamp(.85rem,1.7vw,1rem);color:var(--muted);line-height:1.55}
 
-  /* lesson slide */
   .lessons{display:flex;flex-direction:column;gap:1.4rem;margin-top:2rem;max-width:900px}
   .lesson{display:flex;align-items:flex-start;gap:1.2rem}
   .lesson .dot{flex:0 0 auto;width:14px;height:14px;background:#e0b020;
     border-radius:3px;margin-top:.55rem;transform:rotate(45deg)}
   .lesson p{font-size:clamp(1rem,2.3vw,1.4rem);color:#0b102a;line-height:1.5}
 
-  /* photo slide */
-  .photo-frame{
-    width:min(90vw,820px);aspect-ratio:16/9;
-    background:#161b40;border:1px solid var(--card-l);
-    border-radius:18px;display:grid;place-items:center;
-    margin:2rem auto;color:#6b74a0;font-style:italic;
-    font-size:clamp(.9rem,1.8vw,1.05rem);
-    overflow:hidden;
-  }
-  .photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
-
-  /* thank-you message */
   .body-msg{max-width:820px;font-size:clamp(1rem,2.2vw,1.35rem);
     line-height:1.75;color:var(--muted);margin:1.6rem auto 0;text-align:center}
   .sign{color:var(--gold);font-style:italic;margin-top:1.8rem;
     font-size:clamp(.9rem,1.8vw,1.05rem);letter-spacing:.02em}
 
-  /* ---------- progress / controls ---------- */
+  /* ---------- controls ---------- */
   .dots{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
-    display:flex;gap:.55rem;z-index:50}
+    display:flex;gap:.55rem;z-index:50;opacity:0;transition:opacity .4s}
+  body.started .dots{opacity:1}
   .dot-btn{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;
     background:rgba(255,255,255,.25);transition:all .3s}
   .dot-btn.on{background:var(--gold);width:24px;border-radius:4px}
 
-  .arrows{position:fixed;bottom:1.3rem;right:1.5rem;display:flex;gap:.5rem;z-index:50}
+  .arrows{position:fixed;bottom:1.3rem;right:1.5rem;display:flex;gap:.5rem;
+    z-index:50;opacity:0;transition:opacity .4s}
+  body.started .arrows{opacity:1}
   .arrows button{width:42px;height:42px;border-radius:50%;cursor:pointer;
     border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
-    color:#fff;font-size:1.1rem;transition:all .2s;backdrop-filter:blur(10px)}
+    color:#fff;font-size:1rem;transition:all .2s;backdrop-filter:blur(10px);
+    display:grid;place-items:center}
   .arrows button:hover{background:rgba(255,255,255,.2);border-color:var(--gold)}
   .arrows button:disabled{opacity:.3;cursor:not-allowed}
+  .arrows button[hidden]{display:none}
 
   .counter{position:fixed;bottom:1.8rem;left:1.5rem;font-size:.75rem;
-    color:rgba(255,255,255,.5);letter-spacing:.15em;z-index:50}
+    color:rgba(255,255,255,.5);letter-spacing:.15em;z-index:50;
+    opacity:0;transition:opacity .4s}
+  body.started .counter{opacity:1}
 
-  /* light-slide overrides for controls */
   body.on-light .counter,
   body.on-light .arrows button{color:#0b102a}
   body.on-light .arrows button{background:rgba(11,16,42,.08);border-color:rgba(11,16,42,.15)}
   body.on-light .dot-btn{background:rgba(11,16,42,.25)}
   body.on-light .dot-btn.on{background:#e0b020}
 
-  /* reduced motion */
   @media(prefers-reduced-motion:reduce){
     *{transition-duration:.01ms!important;animation-duration:.01ms!important}
   }
@@ -152,10 +190,29 @@
 </head>
 <body>
 
+<div class="progress" id="progressBar"></div>
+
+<!-- ================= LOCK SCREEN ================= -->
+<div class="lock" id="lock">
+  <div class="lock-card">
+    <div class="eyebrow">A Private Premiere</div>
+    <h1>Enter the code</h1>
+    <p>Four digits to unlock your surprise.</p>
+    <div class="pin" id="pin">
+      <input type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 1">
+      <input type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
+      <input type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
+      <input type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
+    </div>
+    <div class="lock-err" id="lockErr" role="alert"></div>
+  </div>
+</div>
+
+<!-- ================= DECK ================= -->
 <div class="deck" id="deck">
 
   <!-- 1 · TITLE -->
-  <section class="slide active center bg1">
+  <section class="slide active center bg1" data-duration="5000">
     <div class="eyebrow">A Birthday Tribute</div>
     <div class="rule"></div>
     <h1 class="display">Happy Birthday</h1>
@@ -164,7 +221,7 @@
   </section>
 
   <!-- 2 · THREE WORDS -->
-  <section class="slide center bg2">
+  <section class="slide center bg2" data-duration="7000">
     <div class="eyebrow">To a teacher who…</div>
     <div class="grid3">
       <div class="card">
@@ -183,7 +240,7 @@
   </section>
 
   <!-- 3 · LESSONS -->
-  <section class="slide bg3">
+  <section class="slide bg3" data-duration="8000">
     <div class="eyebrow">What we carry with us</div>
     <h2 class="section">Lessons beyond the syllabus</h2>
     <div class="rule left"></div>
@@ -196,7 +253,7 @@
   </section>
 
   <!-- 4 · WISHES -->
-  <section class="slide center bg4">
+  <section class="slide center bg4" data-duration="7000">
     <div class="eyebrow">Wishes for the year ahead</div>
     <div class="grid3">
       <div class="card">
@@ -214,7 +271,7 @@
     </div>
   </section>
 
-  <!-- 5 · THANK YOU -->
+  <!-- 5 · THANK YOU (last — auto stops here) -->
   <section class="slide center bg5">
     <h1 class="display" style="font-size:clamp(2.2rem,7vw,5rem)">Thank you, Sir.</h1>
     <div class="rule" style="margin:1.5rem auto"></div>
@@ -226,91 +283,233 @@
     <p class="sign">— with respect and gratitude, from all of us</p>
   </section>
 
-  <!-- 6 · PHOTO -->
-  <section class="slide center bg6">
-    <div class="eyebrow">One for the album</div>
-    <div class="photo-frame" id="photoFrame">
-      <!-- Replace with: <img src="class_photo.jpg" alt="Class photo"> -->
-      [ drop your class photo here ]
-    </div>
-    <h2 class="section" style="font-size:clamp(1.3rem,3.5vw,2rem);color:var(--white)">
-      Happy Birthday, Sir Jacob 🎂
-    </h2>
-  </section>
-
 </div>
 
-<!-- controls -->
-<div class="counter"><span id="cur">01</span> / <span id="tot">06</span></div>
+<!-- ================= CONTROLS ================= -->
+<div class="counter"><span id="cur">01</span> / <span id="tot">05</span></div>
 <div class="dots" id="dots"></div>
 <div class="arrows">
-  <button id="prev" aria-label="Previous slide">‹</button>
-  <button id="next" aria-label="Next slide">›</button>
+  <button id="autoplayBtn" aria-label="Pause slideshow">❚❚</button>
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <button id="nextBtn" aria-label="Next slide">›</button>
 </div>
 
 <script>
 (function(){
-  const slides = [...document.querySelectorAll('.slide')];
-  const dotsBox = document.getElementById('dots');
-  const prevBtn = document.getElementById('prev');
-  const nextBtn = document.getElementById('next');
-  const curEl = document.getElementById('cur');
-  const totEl = document.getElementById('tot');
-  const deck = document.getElementById('deck');
+  "use strict";
 
-  let idx = 0;
+  /* =========================================================
+     ⚙️ CONFIG
+     ========================================================= */
+  const CORRECT_PIN = "8639";
+  /* ========================================================= */
+
+  /* ---------- Lock screen ---------- */
+  const lock     = document.getElementById("lock");
+  const pinWrap  = document.getElementById("pin");
+  const inputs   = [...pinWrap.querySelectorAll("input")];
+  const lockErr  = document.getElementById("lockErr");
+  let locked     = true;
+
+  inputs.forEach((el, i) => {
+    el.addEventListener("focus", () => el.select());
+
+    el.addEventListener("input", () => {
+      el.value = el.value.replace(/\D/g, "").slice(0, 1);
+      el.classList.toggle("filled", !!el.value);
+      el.classList.remove("wrong");
+      lockErr.classList.remove("show");
+
+      if (el.value && i < inputs.length - 1) inputs[i + 1].focus();
+      if (inputs.every(x => x.value)) setTimeout(checkPin, 180);
+    });
+
+    el.addEventListener("keydown", e => {
+      if (e.key === "Backspace" && !el.value && i > 0) {
+        inputs[i - 1].value = "";
+        inputs[i - 1].classList.remove("filled");
+        inputs[i - 1].focus();
+      }
+      if (e.key === "Enter") checkPin();
+    });
+
+    el.addEventListener("paste", e => {
+      e.preventDefault();
+      const txt = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 4);
+      txt.split("").forEach((ch, j) => {
+        if (inputs[j]) { inputs[j].value = ch; inputs[j].classList.add("filled"); }
+      });
+      inputs[Math.min(txt.length, 3)].focus();
+      if (txt.length === 4) setTimeout(checkPin, 180);
+    });
+  });
+
+  function checkPin(){
+    if (!locked) return;
+    const code = inputs.map(x => x.value).join("");
+    if (code.length < 4) return;
+
+    locked = false;
+    if (code === CORRECT_PIN) {
+      unlockDeck();
+    } else {
+      pinWrap.classList.add("shake");
+      inputs.forEach(i => i.classList.add("wrong"));
+      lockErr.textContent = "That's not it. Try again.";
+      lockErr.classList.add("show");
+
+      setTimeout(() => {
+        pinWrap.classList.remove("shake");
+        inputs.forEach(i => { i.value = ""; i.classList.remove("wrong", "filled"); });
+        inputs[0].focus();
+        locked = true;
+      }, 520);
+    }
+  }
+
+  inputs[0].focus();
+
+  /* ---------- Unlock → start deck ---------- */
+  let started = false;
+
+  function unlockDeck(){
+    setTimeout(() => {
+      lock.classList.add("out");
+      document.body.classList.add("started");
+
+      setTimeout(() => {
+        lock.style.display = "none";
+        started = true;
+        scheduleAdvance();
+      }, 650);
+    }, 250);
+  }
+
+  /* ---------- Deck ---------- */
+  const slides    = [...document.querySelectorAll(".slide")];
+  const dotsBox   = document.getElementById("dots");
+  const prevBtn   = document.getElementById("prevBtn");
+  const nextBtn   = document.getElementById("nextBtn");
+  const autoBtn   = document.getElementById("autoplayBtn");
+  const curEl     = document.getElementById("cur");
+  const totEl     = document.getElementById("tot");
+  const progress  = document.getElementById("progressBar");
+  const deck      = document.getElementById("deck");
+
   const total = slides.length;
+  let idx = 0;
 
-  /* build dots */
   slides.forEach((_, i) => {
-    const b = document.createElement('button');
-    b.className = 'dot-btn';
-    b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-    b.addEventListener('click', () => go(i));
+    const b = document.createElement("button");
+    b.className = "dot-btn";
+    b.setAttribute("aria-label", "Go to slide " + (i + 1));
+    b.addEventListener("click", () => { go(i); });
     dotsBox.appendChild(b);
   });
   const dots = [...dotsBox.children];
 
-  totEl.textContent = String(total).padStart(2, '0');
+  totEl.textContent = String(total).padStart(2, "0");
+  dots[0].classList.add("on");
+  prevBtn.disabled = true;
+  nextBtn.disabled = total === 1;
 
+  /* ---------- Auto-advance ---------- */
+  let autoPlaying = true;
+  let autoTimer = null;
+
+  function scheduleAdvance(){
+    clearTimeout(autoTimer);
+    if (!started) return;
+
+    const isLast = idx === total - 1;
+    if (isLast) {
+      progress.style.transition = "width .3s ease";
+      progress.style.width = "100%";
+      autoBtn.hidden = true;
+      return;
+    }
+
+    if (!autoPlaying) return;
+    autoBtn.hidden = false;
+
+    const dur = +(slides[idx].dataset.duration || 6000);
+
+    // animate progress bar
+    progress.style.transition = "none";
+    progress.style.width = "0%";
+    void progress.offsetWidth;
+    progress.style.transition = `width ${dur}ms linear`;
+    progress.style.width = "100%";
+
+    autoTimer = setTimeout(() => go(idx + 1), dur);
+  }
+
+  function pauseAuto(){
+    autoPlaying = false;
+    clearTimeout(autoTimer);
+    // freeze progress bar where it is
+    const w = getComputedStyle(progress).width;
+    progress.style.transition = "none";
+    progress.style.width = w;
+    autoBtn.textContent = "▶";
+    autoBtn.setAttribute("aria-label", "Resume slideshow");
+  }
+
+  function resumeAuto(){
+    autoPlaying = true;
+    autoBtn.textContent = "❚❚";
+    autoBtn.setAttribute("aria-label", "Pause slideshow");
+    scheduleAdvance();
+  }
+
+  function toggleAuto(){
+    if (autoPlaying) pauseAuto();
+    else resumeAuto();
+  }
+
+  autoBtn.addEventListener("click", toggleAuto);
+
+  /* ---------- Navigation ---------- */
   function go(next){
     if (next < 0 || next >= total || next === idx) return;
 
     const old = slides[idx];
-    old.classList.remove('active');
-    old.classList.add('exit');
-    setTimeout(() => old.classList.remove('exit'), 700);
+    old.classList.remove("active");
+    old.classList.add("exit");
+    setTimeout(() => old.classList.remove("exit"), 700);
 
     idx = next;
-    slides[idx].classList.add('active');
+    slides[idx].classList.add("active");
 
-    dots.forEach((d, i) => d.classList.toggle('on', i === idx));
-    curEl.textContent = String(idx + 1).padStart(2, '0');
-
+    dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+    curEl.textContent = String(idx + 1).padStart(2, "0");
     prevBtn.disabled = idx === 0;
     nextBtn.disabled = idx === total - 1;
 
-    // light-slide override for control colors
-    document.body.classList.toggle('on-light', slides[idx].classList.contains('bg3'));
+    document.body.classList.toggle("on-light", slides[idx].classList.contains("bg3"));
+
+    scheduleAdvance();
   }
 
-  prevBtn.addEventListener('click', () => go(idx - 1));
-  nextBtn.addEventListener('click', () => go(idx + 1));
+  prevBtn.addEventListener("click", () => go(idx - 1));
+  nextBtn.addEventListener("click", () => go(idx + 1));
 
   /* keyboard */
-  document.addEventListener('keydown', e => {
-    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].includes(e.key)) {
+  document.addEventListener("keydown", e => {
+    if (!started) return;
+    if (["ArrowRight","ArrowDown"," ","PageDown","Enter"].includes(e.key)) {
       e.preventDefault(); go(idx + 1);
-    } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) {
+    } else if (["ArrowLeft","ArrowUp","PageUp","Backspace"].includes(e.key)) {
       e.preventDefault(); go(idx - 1);
-    } else if (e.key === 'Home') go(0);
-    else if (e.key === 'End') go(total - 1);
-    else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    } else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(total - 1);
+    else if (e.key === "p" || e.key === "P") toggleAuto();
+    else if (e.key === "f" || e.key === "F") toggleFullscreen();
   });
 
-  /* click right half = next, left half = prev */
-  deck.addEventListener('click', e => {
-    if (e.target.closest('.arrows, .dots')) return;
+  /* click halves */
+  deck.addEventListener("click", e => {
+    if (e.target.closest(".arrows, .dots")) return;
     const x = e.clientX / window.innerWidth;
     if (x > 0.6) go(idx + 1);
     else if (x < 0.4) go(idx - 1);
@@ -318,26 +517,20 @@
 
   /* swipe */
   let sx = 0, sy = 0;
-  deck.addEventListener('touchstart', e => {
+  deck.addEventListener("touchstart", e => {
     sx = e.touches[0].clientX; sy = e.touches[0].clientY;
   }, { passive: true });
-  deck.addEventListener('touchend', e => {
+  deck.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
     if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
     go(dx < 0 ? idx + 1 : idx - 1);
   }, { passive: true });
 
-  /* fullscreen */
   function toggleFullscreen(){
     if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
     else document.exitFullscreen?.();
   }
-
-  /* init */
-  dots[0].classList.add('on');
-  prevBtn.disabled = true;
-  nextBtn.disabled = total === 1;
 })();
 </script>
 </body>
