@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Happy Birthday, Sir Jacob Emmanuel</title>
+<style>
+  :root{
+    --navy:#0b102a; --indigo:#1b1f4b; --violet:#4a28a8;
+    --gold:#f5c542; --white:#fff; --muted:#b9c2e0;
+    --card:#1e2452; --card-l:#3a4280;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#05060f;color:#fff;
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+
+  /* ---------- deck ---------- */
+  .deck{position:fixed;inset:0}
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:clamp(1.5rem,5vw,4.5rem);
+    opacity:0;visibility:hidden;
+    transform:scale(1.03);
+    transition:opacity .7s ease,transform .9s cubic-bezier(.2,.9,.2,1),visibility .7s;
+    will-change:opacity,transform;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:scale(1);z-index:2}
+  .slide.exit{opacity:0;transform:scale(.97)}
+
+  /* backgrounds */
+  .bg1{background:linear-gradient(135deg,#0b102a 0%,#1b1f4b 100%)}
+  .bg2{background:linear-gradient(120deg,#1b1f4b 0%,#4a28a8 100%)}
+  .bg3{background:linear-gradient(90deg,#f3f6ff 0%,#ffffff 100%);color:#0b102a}
+  .bg4{background:linear-gradient(135deg,#0b102a 0%,#1b1f4b 100%)}
+  .bg5{background:linear-gradient(135deg,#4a28a8 0%,#0b102a 100%)}
+  .bg6{background:linear-gradient(120deg,#0b102a 0%,#1b1f4b 100%)}
+
+  /* subtle grain overlay */
+  .slide::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  }
+  .slide>*{position:relative;z-index:1}
+
+  /* ---------- type ---------- */
+  .eyebrow{font-size:clamp(.65rem,1.4vw,.85rem);letter-spacing:.35em;
+    text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:1.2rem}
+  .bg3 .eyebrow{color:#8a6d0a}
+
+  h1.display{
+    font-size:clamp(2.4rem,8vw,6rem);
+    font-weight:800;letter-spacing:-.02em;line-height:1.02;
+    margin-bottom:.4rem;
+  }
+  h2.name{
+    font-size:clamp(1.6rem,5vw,3.4rem);
+    font-weight:700;color:var(--gold);letter-spacing:-.01em;
+    margin-bottom:2rem;
+  }
+  h2.section{
+    font-size:clamp(1.8rem,5vw,3rem);
+    font-weight:800;letter-spacing:-.02em;margin-bottom:.6rem;
+  }
+  .bg3 h2.section{color:#0b102a}
+
+  .rule{width:90px;height:3px;background:var(--gold);border-radius:2px;margin:0 auto 2rem}
+  .rule.left{margin:0 0 1.6rem}
+  .bg3 .rule{background:#e0b020}
+
+  .tagline{font-size:clamp(.95rem,2vw,1.15rem);color:var(--muted);
+    font-style:italic;letter-spacing:.02em}
+  .bg3 .tagline{color:#5c6784}
+
+  .center{text-align:center;align-items:center}
+  .slide.center{display:flex;flex-direction:column;justify-content:center;align-items:center}
+
+  /* ---------- cards ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,2vw,1.6rem);
+    width:100%;max-width:1050px;margin-top:2.5rem}
+  @media(max-width:720px){.grid3{grid-template-columns:1fr;gap:1rem;margin-top:1.5rem}}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-l);
+    border-radius:20px;
+    padding:clamp(1.2rem,3vw,2.2rem) clamp(1rem,2.5vw,1.8rem);
+    text-align:center;
+    transition:transform .3s,border-color .3s,box-shadow .3s;
+  }
+  .card:hover{transform:translateY(-6px);border-color:var(--gold);
+    box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  .card h3{font-size:clamp(1.4rem,3vw,2rem);color:var(--gold);
+    font-weight:800;margin-bottom:.9rem;letter-spacing:-.01em}
+  .card .bar{width:50px;height:2px;background:var(--card-l);margin:0 auto 1rem}
+  .card p{font-size:clamp(.85rem,1.7vw,1rem);color:var(--muted);line-height:1.55}
+
+  /* lesson slide */
+  .lessons{display:flex;flex-direction:column;gap:1.4rem;margin-top:2rem;max-width:900px}
+  .lesson{display:flex;align-items:flex-start;gap:1.2rem}
+  .lesson .dot{flex:0 0 auto;width:14px;height:14px;background:#e0b020;
+    border-radius:3px;margin-top:.55rem;transform:rotate(45deg)}
+  .lesson p{font-size:clamp(1rem,2.3vw,1.4rem);color:#0b102a;line-height:1.5}
+
+  /* photo slide */
+  .photo-frame{
+    width:min(90vw,820px);aspect-ratio:16/9;
+    background:#161b40;border:1px solid var(--card-l);
+    border-radius:18px;display:grid;place-items:center;
+    margin:2rem auto;color:#6b74a0;font-style:italic;
+    font-size:clamp(.9rem,1.8vw,1.05rem);
+    overflow:hidden;
+  }
+  .photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* thank-you message */
+  .body-msg{max-width:820px;font-size:clamp(1rem,2.2vw,1.35rem);
+    line-height:1.75;color:var(--muted);margin:1.6rem auto 0;text-align:center}
+  .sign{color:var(--gold);font-style:italic;margin-top:1.8rem;
+    font-size:clamp(.9rem,1.8vw,1.05rem);letter-spacing:.02em}
+
+  /* ---------- progress / controls ---------- */
+  .dots{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+    display:flex;gap:.55rem;z-index:50}
+  .dot-btn{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;
+    background:rgba(255,255,255,.25);transition:all .3s}
+  .dot-btn.on{background:var(--gold);width:24px;border-radius:4px}
+
+  .arrows{position:fixed;bottom:1.3rem;right:1.5rem;display:flex;gap:.5rem;z-index:50}
+  .arrows button{width:42px;height:42px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
+    color:#fff;font-size:1.1rem;transition:all .2s;backdrop-filter:blur(10px)}
+  .arrows button:hover{background:rgba(255,255,255,.2);border-color:var(--gold)}
+  .arrows button:disabled{opacity:.3;cursor:not-allowed}
+
+  .counter{position:fixed;bottom:1.8rem;left:1.5rem;font-size:.75rem;
+    color:rgba(255,255,255,.5);letter-spacing:.15em;z-index:50}
+
+  /* light-slide overrides for controls */
+  body.on-light .counter,
+  body.on-light .arrows button{color:#0b102a}
+  body.on-light .arrows button{background:rgba(11,16,42,.08);border-color:rgba(11,16,42,.15)}
+  body.on-light .dot-btn{background:rgba(11,16,42,.25)}
+  body.on-light .dot-btn.on{background:#e0b020}
+
+  /* reduced motion */
+  @media(prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · TITLE -->
+  <section class="slide active center bg1">
+    <div class="eyebrow">A Birthday Tribute</div>
+    <div class="rule"></div>
+    <h1 class="display">Happy Birthday</h1>
+    <h2 class="name">Sir Jacob Emmanuel</h2>
+    <p class="tagline">From your students — with gratitude and respect</p>
+  </section>
+
+  <!-- 2 · THREE WORDS -->
+  <section class="slide center bg2">
+    <div class="eyebrow">To a teacher who…</div>
+    <div class="grid3">
+      <div class="card">
+        <h3>Patient.</h3><div class="bar"></div>
+        <p>You never once gave up on a hard question.</p>
+      </div>
+      <div class="card">
+        <h3>Brilliant.</h3><div class="bar"></div>
+        <p>You made complicated things finally make sense.</p>
+      </div>
+      <div class="card">
+        <h3>Kind.</h3><div class="bar"></div>
+        <p>You treated every one of us like we mattered.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · LESSONS -->
+  <section class="slide bg3">
+    <div class="eyebrow">What we carry with us</div>
+    <h2 class="section">Lessons beyond the syllabus</h2>
+    <div class="rule left"></div>
+    <div class="lessons">
+      <div class="lesson"><span class="dot"></span><p>How to think, not just what to memorise.</p></div>
+      <div class="lesson"><span class="dot"></span><p>That getting it wrong is part of getting it right.</p></div>
+      <div class="lesson"><span class="dot"></span><p>To show up properly — even on the hard days.</p></div>
+      <div class="lesson"><span class="dot"></span><p>That respect is earned by giving it first.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 · WISHES -->
+  <section class="slide center bg4">
+    <div class="eyebrow">Wishes for the year ahead</div>
+    <div class="grid3">
+      <div class="card">
+        <h3>Health</h3><div class="bar"></div>
+        <p>Strength and rest in equal measure.</p>
+      </div>
+      <div class="card">
+        <h3>Joy</h3><div class="bar"></div>
+        <p>The loud kind, and the quiet kind.</p>
+      </div>
+      <div class="card">
+        <h3>Success</h3><div class="bar"></div>
+        <p>Every good thing you've earned, and then some.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · THANK YOU -->
+  <section class="slide center bg5">
+    <h1 class="display" style="font-size:clamp(2.2rem,7vw,5rem)">Thank you, Sir.</h1>
+    <div class="rule" style="margin:1.5rem auto"></div>
+    <p class="body-msg">
+      Thank you for your patience, your wisdom, and for making every lesson count.
+      May this new year bring you good health, peace, and plenty of reasons to smile.
+      Enjoy your day — you've earned it.
+    </p>
+    <p class="sign">— with respect and gratitude, from all of us</p>
+  </section>
+
+  <!-- 6 · PHOTO -->
+  <section class="slide center bg6">
+    <div class="eyebrow">One for the album</div>
+    <div class="photo-frame" id="photoFrame">
+      <!-- Replace with: <img src="class_photo.jpg" alt="Class photo"> -->
+      [ drop your class photo here ]
+    </div>
+    <h2 class="section" style="font-size:clamp(1.3rem,3.5vw,2rem);color:var(--white)">
+      Happy Birthday, Sir Jacob 🎂
+    </h2>
+  </section>
+
+</div>
+
+<!-- controls -->
+<div class="counter"><span id="cur">01</span> / <span id="tot">06</span></div>
+<div class="dots" id="dots"></div>
+<div class="arrows">
+  <button id="prev" aria-label="Previous slide">‹</button>
+  <button id="next" aria-label="Next slide">›</button>
+</div>
+
+<script>
+(function(){
+  const slides = [...document.querySelectorAll('.slide')];
+  const dotsBox = document.getElementById('dots');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const curEl = document.getElementById('cur');
+  const totEl = document.getElementById('tot');
+  const deck = document.getElementById('deck');
+
+  let idx = 0;
+  const total = slides.length;
+
+  /* build dots */
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'dot-btn';
+    b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    b.addEventListener('click', () => go(i));
+    dotsBox.appendChild(b);
+  });
+  const dots = [...dotsBox.children];
+
+  totEl.textContent = String(total).padStart(2, '0');
+
+  function go(next){
+    if (next < 0 || next >= total || next === idx) return;
+
+    const old = slides[idx];
+    old.classList.remove('active');
+    old.classList.add('exit');
+    setTimeout(() => old.classList.remove('exit'), 700);
+
+    idx = next;
+    slides[idx].classList.add('active');
+
+    dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+    curEl.textContent = String(idx + 1).padStart(2, '0');
+
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === total - 1;
+
+    // light-slide override for control colors
+    document.body.classList.toggle('on-light', slides[idx].classList.contains('bg3'));
+  }
+
+  prevBtn.addEventListener('click', () => go(idx - 1));
+  nextBtn.addEventListener('click', () => go(idx + 1));
+
+  /* keyboard */
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].includes(e.key)) {
+      e.preventDefault(); go(idx + 1);
+    } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) {
+      e.preventDefault(); go(idx - 1);
+    } else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(total - 1);
+    else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  });
+
+  /* click right half = next, left half = prev */
+  deck.addEventListener('click', e => {
+    if (e.target.closest('.arrows, .dots')) return;
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.6) go(idx + 1);
+    else if (x < 0.4) go(idx - 1);
+  });
+
+  /* swipe */
+  let sx = 0, sy = 0;
+  deck.addEventListener('touchstart', e => {
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
+    go(dx < 0 ? idx + 1 : idx - 1);
+  }, { passive: true });
+
+  /* fullscreen */
+  function toggleFullscreen(){
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  /* init */
+  dots[0].classList.add('on');
+  prevBtn.disabled = true;
+  nextBtn.disabled = total === 1;
+})();
+</script>
+</body>
+</html>
